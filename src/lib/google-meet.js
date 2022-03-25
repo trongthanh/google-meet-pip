@@ -77,6 +77,10 @@ export async function activatePictureInPicture(participant) {
     // When the video leaves PiP mode by directly closing the PiP window,
     // we need to unmark it as the active video.
     video.addEventListener('leavepictureinpicture', onLeavePictureInPicture);
+    // when our own camera feed is off
+    video.addEventListener('suspend', onVideoSuspended);
+    // when their camera feed is off
+    video.addEventListener('emptied', onVideoSuspended);
 
     // https://web.dev/media-session/#video-conferencing-actions
     enableVideoConferencingControls();
@@ -92,9 +96,15 @@ export async function exitPictureInPicture() {
   const video = document.querySelector('[data-gmpip-active]');
   if (video) {
     video.removeEventListener('leavepictureinpicture', onLeavePictureInPicture);
+    video.removeEventListener('suspend', onVideoSuspended);
+    video.removeEventListener('emptied', onVideoSuspended);
     delete video.dataset.gmpipActive;
   }
   return document.exitPictureInPicture();
+}
+
+function onVideoSuspended() {
+  exitPictureInPicture();
 }
 
 function onLeavePictureInPicture(event) {
@@ -196,7 +206,7 @@ function syncCameraState(control) {
     navigator.mediaSession.setCameraActive(true);
   } else {
     navigator.mediaSession.setCameraActive(false);
-    exitPictureInPicture();
+    // exitPictureInPicture();
   }
 }
 
