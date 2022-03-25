@@ -39,7 +39,8 @@ export function getParticipantsList() {
     // We assign an identifier to each participant's videos so we can easily
     // query them later. Since the names are unique in this case (can be
     // improved later), using the base64 of the names should be enough for now.
-    const id = btoa(name);
+    // NOTE: Unicode solution #1 @ https://developer.mozilla.org/en-US/docs/Glossary/Base64
+    const id = btoa(unescape(encodeURIComponent(name)));
     videos.forEach((video) => (video.dataset.gmpipId = id));
 
     results.push({ id, name, active, available });
